@@ -25,6 +25,10 @@ PHP                                                                        NEWS
     operators" RFC, meaning that incrementing non-numeric strings is now
     deprecated. (Girgias).
   . Various closure binding issues are now deprecated. (alexandre-daubois)
+  . Fixed bug GH-18373 (Don't substitute self/parent with anonymous class).
+    (ilutov)
+  . Prohibit pipe & arrow function combination that leads to confusing parse
+    trees. (ilutov)
 
 - Filter:
   . Added support for configuring the URI parser for FILTER_VALIDATE_URL
@@ -64,6 +68,10 @@ PHP                                                                        NEWS
 - Tokenizer:
   . Fixed bug GH-19507 (Corrupted result after recursive tokenization during
     token_get_all()). (kubawerlos, nielsdos, Arnaud)
+
+- URI:
+  . Clean up naming of internal API (header names, symbol names).
+    (Máté Kocsis, timwolla)
 
 14 Aug 2025, PHP 8.5.0beta1
 

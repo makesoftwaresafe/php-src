@@ -6467,6 +6467,10 @@ static void zend_compile_pipe(znode *result, zend_ast *ast)
 	zend_ast *operand_ast = ast->child[0];
 	zend_ast *callable_ast = ast->child[1];
 
+	if (callable_ast->kind == ZEND_AST_ARROW_FUNC && !(callable_ast->attr & ZEND_PARENTHESIZED_ARROW_FUNC)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Arrow functions on the right hand side of |> must be parenthesized");
+	}
+
 	/* Compile the left hand side down to a value first. */
 	znode operand_result;
 	zend_compile_expr(&operand_result, operand_ast);
@@ -7091,16 +7095,20 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 				ZEND_ASSERT(fetch_type == ZEND_FETCH_CLASS_SELF || fetch_type == ZEND_FETCH_CLASS_PARENT);
 
 				zend_ensure_valid_class_fetch_type(fetch_type);
+
+				bool substitute_self_parent = zend_is_scope_known()
+					&& !(CG(active_class_entry)->ce_flags & ZEND_ACC_ANON_CLASS);
+
 				if (fetch_type == ZEND_FETCH_CLASS_SELF) {
 					/* Scope might be unknown for unbound closures and traits */
-					if (zend_is_scope_known()) {
+					if (substitute_self_parent) {
 						class_name = CG(active_class_entry)->name;
 						ZEND_ASSERT(class_name && "must know class name when resolving self type at compile time");
 					}
 				} else {
 					ZEND_ASSERT(fetch_type == ZEND_FETCH_CLASS_PARENT);
 					/* Scope might be unknown for unbound closures and traits */
-					if (zend_is_scope_known()) {
+					if (substitute_self_parent) {
 						class_name = CG(active_class_entry)->parent_name;
 						ZEND_ASSERT(class_name && "must know class name when resolving parent type at compile time");
 					}
